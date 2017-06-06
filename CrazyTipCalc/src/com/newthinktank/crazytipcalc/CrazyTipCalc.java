@@ -1,13 +1,27 @@
 package com.newthinktank.crazytipcalc;
 
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.app.Activity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.Chronometer;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RadioGroup.OnCheckedChangeListener;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.Spinner;
+import android.widget.TextView;
 
 public class CrazyTipCalc extends Activity {
 	
@@ -24,7 +38,52 @@ public class CrazyTipCalc extends Activity {
 	EditText billBeforeTipET;
 	EditText tipAmountET;
 	EditText finalBillET;
-
+	
+	// NEW PART ---------------
+	
+	// Sum of all radio buttons and check boxes
+	
+	private int[] checklistValues = new int[12]; 
+	
+	// Declare CheckBoxes
+	
+	CheckBox friendlyCheckBox;
+	CheckBox specialsCheckBox;
+	CheckBox opinionCheckBox;
+	
+	// Declare RadioButtons
+	
+	RadioGroup availableRadioGroup;
+	RadioButton availableBadRadio;
+	RadioButton availableOKRadio;
+	RadioButton availableGoodRadio;
+	
+	// Declare Spinner (Drop Down Box)
+	
+	Spinner problemsSpinner;
+	
+	// Declare Buttons
+	
+	Button startChronometerButton;
+	Button pauseChronometerButton;
+	Button resetChronometerButton;
+	
+	// Declare Chronometer
+	
+	Chronometer timeWaitingChronometer;
+	
+	// The number of seconds you spent 
+	// waiting for the waitress
+	
+	long secondsYouWaited = 0;
+	
+	// TextView for the chronometer
+	
+	TextView timeWaitingTextView;
+	
+	
+	// END OF NEW PART ---------------
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,8 +115,6 @@ public class CrazyTipCalc extends Activity {
 		tipAmountET = (EditText) findViewById(R.id.tipEditText); // Tip amount
 		finalBillET = (EditText) findViewById(R.id.finalBillEditText); // Bill plus tip
 		
-		// SECOND PART ---------------
-		
 		// Initialize the SeekBar and add a ChangeListener
 		
 		tipSeekBar = (SeekBar) findViewById(R.id.changeTipSeekBar);
@@ -69,6 +126,60 @@ public class CrazyTipCalc extends Activity {
 		// Add change listener for when the bill before tip is changed
 		
 		billBeforeTipET.addTextChangedListener(billBeforeTipListener);
+		
+		// NEW PART ---------------
+		
+		// Initialize CheckBoxs
+		
+		friendlyCheckBox = (CheckBox) findViewById(R.id.friendlyCheckBox);
+		specialsCheckBox = (CheckBox) findViewById(R.id.specialsCheckBox);
+		opinionCheckBox = (CheckBox) findViewById(R.id.opinionCheckBox);
+		
+		setUpIntroCheckBoxes(); // Add change listeners to check boxes
+		
+		// Initialize RadioButtons
+		
+		availableBadRadio = (RadioButton) findViewById(R.id.availableBadRadio);
+		availableOKRadio = (RadioButton) findViewById(R.id.availableOKRadio);
+		availableGoodRadio = (RadioButton) findViewById(R.id.availableGoodRadio);
+		
+		// Initialize RadioGroups
+		
+		availableRadioGroup = (RadioGroup) findViewById(R.id.availableRadioGroup);
+		
+		// Add ChangeListener To Radio buttons
+		
+		addChangeListenerToRadios();
+		
+		// Initialize the Spinner
+		
+		problemsSpinner = (Spinner) findViewById(R.id.problemsSpinner);
+		
+		problemsSpinner.setPrompt("Problem Solving");
+		
+		// Add ItemSelectedListener To Spinner
+		
+		addItemSelectedListenerToSpinner();
+		
+		// Initialize Buttons
+		
+		startChronometerButton = (Button) findViewById(R.id.startChronometerButton);
+		pauseChronometerButton = (Button) findViewById(R.id.pauseChronometerButton);
+		resetChronometerButton = (Button) findViewById(R.id.resetChronometerButton);
+		
+		// Add setOnClickListeners for buttons
+		
+		setButtonOnClickListeners();
+		
+		// Initialize Chronometer
+		
+		timeWaitingChronometer = (Chronometer) findViewById(R.id.timeWaitingChronometer);
+		
+		// TextView for Chronometer
+		
+		timeWaitingTextView = (TextView) findViewById(R.id.timeWaitingTextView);
+		
+		// END OF NEW PART ---------------
 	}
 	
 	// Called when the bill before tip amount is changed
@@ -139,6 +250,7 @@ public class CrazyTipCalc extends Activity {
 	// rotated. Used to save state information that you'd like
 	// to be made available.
 	
+	@Override
 	protected void onSaveInstanceState(Bundle outState){
 		
 		super.onSaveInstanceState(outState);
@@ -148,10 +260,6 @@ public class CrazyTipCalc extends Activity {
 		outState.putDouble(BILL_WITHOUT_TIP, billBeforeTip);
 		
 	}
-	
-	// ---- END OF FIRST PART ----
-	
-	// ---- SECOND PART ----------
 	
 	// SeekBar used to make a custom tip
 	
@@ -189,10 +297,8 @@ public class CrazyTipCalc extends Activity {
 		}
 		
 	};
-	
-	// ---- END OF SECOND PART ----------
 
-	@Override
+@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.crazy_tip_calc, menu);
